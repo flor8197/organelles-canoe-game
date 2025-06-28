@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organelles Canoe Game</title>
+    <style>
+        body {
+            background-image: url('https://images.unsplash.com/photo-1529088743339-8a29229aa1e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        #gameArea {
+            margin-top: 30px;
+        }
+
+        #functionDisplay {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        .option {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: black;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .option:hover {
+            transform: scale(1.1);
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        #summary {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Organelles Canoe Game</h1>
+    <div id="levelSelection">
+        <h2>Select Difficulty Level</h2>
+        <button class="option" onclick="startGame('easy')">Easy</button>
+        <button class="option" onclick="startGame('medium')">Medium</button>
+        <button class="option" onclick="startGame('hard')">Hard</button>
+    </div>
+
+    <div id="gameArea" style="display:none;">
+        <div id="functionDisplay"></div>
+        <div id="options"></div>
+        <div id="feedback"></div>
+        <div id="summary"></div>
+    </div>
+
+    <script>
+        const organelles = [
+            { name: "Nucleus", function: "Controls cell activities and contains DNA.", type: "Animal/Plant" },
+            { name: "Mitochondria", function: "Produces energy through cellular respiration.", type: "Animal/Plant" },
+            { name: "Chloroplast", function: "Performs photosynthesis to make food.", type: "Plant" },
+            { name: "Ribosome", function: "Synthesizes proteins.", type: "Animal/Plant/Bacteria" },
+            { name: "Cell Membrane", function: "Controls what enters and leaves the cell.", type: "Animal/Plant/Bacteria" },
+            { name: "Cell Wall", function: "Provides structure and protection; present in plants and bacteria.", type: "Plant/Bacteria" },
+            { name: "Cytoplasm", function: "Gel-like substance where organelles are suspended.", type: "Animal/Plant/Bacteria" },
+            { name: "Vacuole", function: "Stores nutrients, waste, and water.", type: "Animal/Plant" },
+            { name: "Flagella", function: "Helps in cell movement; present in bacteria and some animal cells.", type: "Bacteria/Animal" },
+            { name: "Plasmid", function: "Carries additional DNA in bacteria.", type: "Bacteria" }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let difficulty = 'easy';
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startGame(selectedDifficulty) {
+            difficulty = selectedDifficulty;
+            shuffle(organelles);
+            currentIndex = 0;
+            score = 0;
+            document.getElementById('levelSelection').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('summary').innerHTML = '';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= organelles.length) {
+                showSummary();
+                return;
+            }
+
+            const organelle = organelles[currentIndex];
+            document.getElementById('functionDisplay').innerText = `Function: ${organelle.function}`;
+
+            const correctOption = organelle.name;
+            let options = [correctOption];
+
+            let numOptions = difficulty === 'easy' ? 2 : (difficulty === 'medium' ? 3 : 4);
+
+            while (options.length < numOptions) {
+                let randomOption = organelles[Math.floor(Math.random() * organelles.length)].name;
+                if (!options.includes(randomOption)) {
+                    options.push(randomOption);
+                }
+            }
+
+            options = shuffle(options);
+
+            let optionsHTML = '';
+            options.forEach(option => {
+                optionsHTML += `<button class="option" onclick="checkAnswer('${option}')">${option}</button>`;
+            });
+
+            document.getElementById('options').innerHTML = optionsHTML;
+            document.getElementById('feedback').innerText = '';
+        }
+
+        function checkAnswer(selected) {
+            const correct = organelles[currentIndex].name;
+            if (selected === correct) {
+                score++;
+                document.getElementById('feedback').innerText = "Correct! Great job!";
+                document.getElementById('feedback').style.color = "lime";
+            } else {
+                document.getElementById('feedback').innerText = `Incorrect. The correct answer is ${correct}.`;
+                document.getElementById('feedback').style.color = "red";
+            }
+
+            currentIndex++;
+            setTimeout(loadQuestion, 2000);
+        }
+
+        function showSummary() {
+            const summaryText = `Game Over! Your final score is ${score} out of ${organelles.length}.`;
+            let performance = '';
+            if (score === organelles.length) {
+                performance = "Excellent! You know your organelles perfectly!";
+            } else if (score >= organelles.length * 0.7) {
+                performance = "Good job! A little more practice and you'll master it!";
+            } else {
+                performance = "Keep practicing to improve your knowledge!";
+            }
+
+            document.getElementById('summary').innerHTML = `<p>${summaryText}</p><p>${performance}</p><button class="option" onclick="location.reload()">Play Again</button>`;
+        }
+    </script>
+
+</body>
+</html>
